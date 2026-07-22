@@ -2,7 +2,7 @@
 
 This component is tested exhaustively and in isolation, deliberately: it is the one piece
 of the HHL port with no reference implementation to check against, and a subtly wrong
-comparator would not crash -- it would quietly produce a wrong final answer that still
+comparator would not crash; it would quietly produce a wrong final answer that still
 looks like a plausible probability distribution.
 
 Every input pair is checked for small widths, and crucially so is *ancilla cleanliness*:

@@ -80,8 +80,8 @@ def test_fake_inversion_maps_theta_to_one_over_theta(m_in, expected):
 @pytest.mark.parametrize(
     "b",
     [
-        np.array([1.0, 1.0]),  # the demo's case (parallel to an eigenvector -- weak)
-        np.array([1.0, 0.0]),  # superposes both eigenvalues -- exercises the inversion
+        np.array([1.0, 1.0]),  # the demo's case (parallel to an eigenvector, weak)
+        np.array([1.0, 0.0]),  # superposes both eigenvalues, exercises the inversion
         np.array([0.0, 1.0]),
         np.array([1.0, 3.0]),
     ],

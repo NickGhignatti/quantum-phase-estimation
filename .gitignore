@@ -18,3 +18,6 @@ htmlcov/
 # OS
 Thumbs.db
 .DS_Store
+
+# Personal study notes, not part of the assignment
+notes/

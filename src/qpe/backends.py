@@ -11,7 +11,7 @@ Three backend kinds
 ``"fake:<name>"``
     Local simulation using a noise model, coupling map and basis gates cloned from a
     real IBM device (e.g. ``"fake:FakeManilaV2"``).  Needs no credentials, but shows
-    realistic error behaviour -- the honest dress rehearsal for a hardware run.
+    realistic error behaviour, the honest dress rehearsal for a hardware run.
 ``"ibm"``
     Real hardware via Qiskit Runtime.  Requires credentials; see the module notes below.
 
@@ -36,7 +36,7 @@ Transpilation
 Every path here transpiles to ISA form before running.  This is not optional bookkeeping:
 Aer rejects the opaque custom gates that :func:`qpe.core.qpe_circuit` builds, and hardware
 requires circuits expressed in the device basis.  Doing it in one place keeps the
-simulator and hardware paths honest -- what the tests exercise is what hardware runs.
+simulator and hardware paths honest: what the tests exercise is what hardware runs.
 """
 
 from __future__ import annotations
@@ -127,7 +127,7 @@ def _runtime_service():
         return QiskitRuntimeService(
             channel="ibm_quantum_platform", token=token, instance=instance
         )
-    # No .env -- rely on a previously saved account.
+    # No .env, so rely on a previously saved account.
     return QiskitRuntimeService()
 
 
@@ -182,7 +182,7 @@ def _extract_counts(pub_result: Any) -> dict[str, int]:
     bitstrings are joined into a single space-separated key.
 
     **Ordering contract:** segments appear in ``pub_result.data`` key order, which is the
-    order the classical registers were *added* to the circuit -- deliberately not Qiskit's
+    order the classical registers were *added* to the circuit, deliberately not Qiskit's
     usual display convention, which prints registers in reverse. Callers must split on
     whitespace and read segments in register-add order. Getting this backwards silently
     swaps registers and produces plausible-looking nonsense, so :func:`split_counts_by_register`
@@ -214,7 +214,7 @@ def split_counts_by_register(
     Parameters
     ----------
     register_names
-        Classical register names in the order they were added to the circuit -- i.e.
+        Classical register names in the order they were added to the circuit, i.e.
         ``[c.name for c in circuit.cregs]``.
     """
     out = []

@@ -31,7 +31,7 @@ def eigenstate_of_phase_gate() -> QuantumCircuit:
     return qc
 
 
-# (label, theta, num_eval_qubits) -- every theta is an exact multiple of 2**-n
+# (label, theta, num_eval_qubits); every theta is an exact multiple of 2**-n
 EXACT_PHASES = [
     ("T gate", 1 / 8, 3),
     ("S gate", 1 / 4, 3),
@@ -111,7 +111,7 @@ def test_matches_qiskit_builtin_phase_estimation(label, theta, n, eigenstate_of_
     the one that reads directly as a phase without further manipulation.
 
     Comparing the distributions after reversing the built-in's bits therefore checks the
-    part that actually matters -- that we put the same amplitude on the same phase.
+    part that actually matters, that we put the same amplitude on the same phase.
     """
     unitary = PhaseGate(2 * np.pi * theta)
 

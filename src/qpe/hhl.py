@@ -6,7 +6,7 @@ This is a faithful port: it keeps the demo's simplifications rather than buildin
 general HHL.  In particular eigenvalues must be of the form ``2**-k``, which is what makes
 the ``fake_inversion`` bit-reversal trick a valid stand-in for real eigenvalue inversion.
 
-**QPE is the subroutine at the heart of this file** -- ``qpe.core.qpe_circuit`` is imported
+**QPE is the subroutine at the heart of this file**: ``qpe.core.qpe_circuit`` is imported
 and used directly, first to write eigenvalues into a register and later, inverted, to
 uncompute them.  That is the assignment's fourth goal demonstrated in code rather than prose.
 
@@ -28,7 +28,7 @@ Two deviations from the Qrisp original, both deliberate
     the *principle of deferred measurement*: the uncomputation acts only on the system,
     phase and inversion registers, never on the post-selected ones, so it commutes with
     those measurements and the final statistics are identical.  The price is that the
-    discarded shots are wasted rather than retried -- so we report the success rate.
+    discarded shots are wasted rather than retried, so we report the success rate.
 
 ``case_indicator >= inv_res`` -> :func:`qpe.arithmetic.comparator_ge_gate`
     Qiskit has no register-vs-register comparator, so that module supplies one.
@@ -38,7 +38,7 @@ Why the comparison encodes ``1/lambda``
 With the ``m``-qubit case indicator in uniform superposition over ``N = 2**m`` values and
 ``y`` the integer in the inversion register, the comparison marks the ``y`` values with
 ``c < y``.  Re-applying the Hadamards and projecting onto ``|0>`` gives amplitude
-``y / N`` -- linear in ``y``, and ``y`` is proportional to ``1/lambda``.  That amplitude
+``y / N``, linear in ``y``, and ``y`` is proportional to ``1/lambda``.  That amplitude
 proportional to ``1/lambda`` is precisely what HHL needs.
 """
 
@@ -73,7 +73,7 @@ def fake_inversion_gate(num_phase_qubits: int) -> QuantumCircuit:
     ``1/theta`` in a register of ``num_phase_qubits + 1`` qubits, by copying phase qubit
     ``i`` onto inversion qubit ``num_phase_qubits - i`` with a CX.
 
-    This only works because eigenvalues are restricted to powers of two -- exactly the
+    This only works because eigenvalues are restricted to powers of two, exactly the
     demo's simplifying assumption.  A general HHL would need controlled rotations here.
 
     Returns a circuit on ``[phase, inversion]``; the inversion register must start in
@@ -200,7 +200,7 @@ def build_hhl_circuit(
     if measure:
         from qiskit.circuit import ClassicalRegister
 
-        # Names must differ from the quantum registers above -- Qiskit shares one namespace.
+        # Names must differ from the quantum registers above, since Qiskit shares one namespace.
         c_sys = ClassicalRegister(n_sys, "c_sys")
         c_case = ClassicalRegister(lay.n_inv, "c_case")
         c_flag = ClassicalRegister(1, "c_flag")
@@ -217,7 +217,7 @@ class HHLResult:
     """Outcome of an HHL run."""
 
     amplitudes: np.ndarray
-    """Normalised |x| recovered as sqrt(probability). Magnitudes only -- see note below."""
+    """Normalised |x| recovered as sqrt(probability). Magnitudes only; see note below."""
     probabilities: np.ndarray
     success_rate: float
     """Fraction of shots surviving post-selection."""
@@ -267,7 +267,7 @@ def solve_hhl(
     counts = run_circuit(qc, backend, shots=shots)
     assert isinstance(counts, dict)
 
-    # Decode by register *name* rather than position -- the joined-key segment order is
+    # Decode by register *name* rather than position, because the joined-key segment order is
     # register-add order, which is the reverse of Qiskit's display convention and very
     # easy to get backwards.
     register_names = [creg.name for creg in qc.cregs]

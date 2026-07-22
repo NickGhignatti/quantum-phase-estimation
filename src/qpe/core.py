@@ -11,7 +11,7 @@ The construction is the textbook one, kept deliberately explicit for teaching va
 1. Hadamard the estimation register into a uniform superposition.
 2. For each estimation qubit ``j``, apply ``U`` controlled on that qubit, ``2**j`` times.
    Repeating the gate (rather than exponentiating the matrix) is the pedagogically honest
-   version -- it makes the exponential cost of QPE visible in the circuit itself, and it
+   version: it makes the exponential cost of QPE visible in the circuit itself, and it
    mirrors the reference implementations in the PennyLane and Qrisp tutorials.
 3. Apply the inverse QFT to the estimation register.
 4. Measure.
@@ -35,7 +35,7 @@ def _as_gate(unitary: QuantumCircuit | Gate | Operator | np.ndarray) -> Gate:
     """Normalise any reasonable description of a unitary to a ``Gate``.
 
     Accepts a ``Gate``, a ``QuantumCircuit``, a ``quantum_info.Operator``, or a raw
-    unitary matrix -- the last two being the natural way to hand over a unitary obtained
+    unitary matrix, the last two being the natural way to hand over a unitary obtained
     from classical linear algebra, which is how the multi-qubit tests supply one.
     """
     if isinstance(unitary, Gate):
@@ -121,7 +121,7 @@ def qpe_circuit(
 
     qc.h(ev)
 
-    # Qubit j controls U^(2**j) -- this is what makes qubit 0 the least significant bit.
+    # Qubit j controls U^(2**j), which is what makes qubit 0 the least significant bit.
     for j in range(num_eval_qubits):
         qc.append(controlled_power(gate, 2**j), [ev[j], *tgt])
 

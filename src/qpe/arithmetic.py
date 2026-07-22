@@ -7,7 +7,7 @@ The Qrisp HHL demo compares two *quantum* registers::
     qbl = (case_indicator >= inv_res)
 
 Qiskit has no equivalent.  Its ``IntegerComparatorGate`` compares a register against a
-**classical constant** only, which is not what HHL needs -- both operands are quantum and
+**classical constant** only, which is not what HHL needs, because both operands are quantum and
 in superposition.  So we build one.
 
 How it works
@@ -20,8 +20,8 @@ computed as ``a + (~b) + 1``:
 * the carry-out is 1 exactly when ``a - b >= 0``, i.e. when ``a >= b``.
 
 Both operands must survive the comparison unchanged, because HHL keeps using them
-afterwards -- but ``FullAdderGate`` overwrites its second operand with the sum.  The
-standard fix is **compute -- copy -- uncompute**: run the adder, CX the carry-out onto a
+afterwards, but ``FullAdderGate`` overwrites its second operand with the sum.  The
+standard fix is **compute, copy, uncompute**: run the adder, CX the carry-out onto a
 clean result qubit, then run the adder's inverse to restore everything.  Only the result
 qubit is left correlated with the comparison; the sum and carry ancillas return to
 ``|0>`` and so do not pollute later interference.

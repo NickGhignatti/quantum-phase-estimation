@@ -6,8 +6,7 @@ the heart of the HHL algorithm for solving linear systems.
 
 ## Quickstart
 
-Requires [uv](https://docs.astral.sh/uv/getting-started/installation/) — a single
-self-contained installer, no prior Python setup needed.
+Requires [uv](https://docs.astral.sh/uv/getting-started/installation/), a single self-contained installer, no prior Python setup needed.
 
 ```bash
 uv sync --extra dev      # creates the environment and installs everything
@@ -22,7 +21,7 @@ uv run pytest
 
 No IBM Quantum account is required for any of the above: the tests and three of the four
 notebooks run on a local simulator. Credentials are only needed to re-run
-`03_hardware.ipynb` against a real device — and even then, that notebook reads previously
+`03_hardware.ipynb` against a real device, and even then, that notebook reads previously
 saved results from `data/`, so it renders correctly without an account.
 
 ## Project goals
@@ -36,7 +35,7 @@ saved results from `data/`, so it renders correctly without an account.
   [`02_qpe_qiskit.ipynb`](notebooks/02_qpe_qiskit.ipynb) against known eigenvalues.
 
 - [ ] **Run on real quantum hardware.**
-  [`03_hardware.ipynb`](notebooks/03_hardware.ipynb) — ideal simulator → noise model
+  [`03_hardware.ipynb`](notebooks/03_hardware.ipynb): ideal simulator → noise model
   cloned from a real device → IBM Quantum. *(Awaiting the hardware run.)*
 
 - [x] **Connect QPE to HHL.**
@@ -49,12 +48,12 @@ saved results from `data/`, so it renders correctly without an account.
 ```
 src/qpe/
   qft.py          inverse QFT + the bit-ordering convention the package obeys
-  core.py         qpe_circuit() — the algorithm itself
+  core.py         qpe_circuit(), the algorithm itself
   analysis.py     counts → phases, the analytic QPE distribution, plotting
   backends.py     one run() surface over simulator / noise model / real hardware
   arithmetic.py   register-vs-register comparator (Qiskit has none; HHL needs one)
   hhl.py          the HHL port, with QPE as its subroutine
-tests/            pytest — deterministic assertions, exhaustive where feasible
+tests/            pytest, deterministic assertions, exhaustive where feasible
 notebooks/        the written report
 ```
 
@@ -65,13 +64,13 @@ assertions are deterministic rather than statistical:
 
 - **Dyadic phases.** For θ ∈ {1/8, 1/4, 3/8, 1/2, 5/16, 7/16}, QPE concentrates all
   amplitude on a single basis state, so the measured phase must be exact with
-  probability 1. This is what pins down the bit-ordering convention — an endianness bug
+  probability 1. This is what pins down the bit-ordering convention: an endianness bug
   produces a plausible-looking but wrong distribution rather than an obvious failure.
 - **Cross-check against Qiskit's built-in** `phase_estimation()`. The two use opposite
   bit-ordering conventions; the test compares them after accounting for that, which
   checks the physics while the dyadic tests pin down the readout.
 - **Exhaustive comparator testing.** The register-vs-register comparator is checked on
-  every input pair for small widths, including that its ancillas return to |0⟩ — leftover
+  every input pair for small widths, including that its ancillas return to |0⟩, since leftover
   entanglement there would silently corrupt HHL's uncomputation.
 - **HHL against numpy.** Note that the reference demo's own example, `b = [1, 1]`, is
   parallel to an eigenvector of `A` and so would pass even if eigenvalue inversion did
@@ -86,7 +85,7 @@ general controlled rotations). Two things could not be translated directly:
 
 | Qrisp | Here | Why |
 |---|---|---|
-| `@qrisp.RUS` repeat-until-success | post-selection on measured registers | Qiskit's equivalent needs mid-circuit measurement with feed-forward. Valid by the principle of deferred measurement — the uncomputation never touches the post-selected registers. The success rate is reported rather than hidden. |
+| `@qrisp.RUS` repeat-until-success | post-selection on measured registers | Qiskit's equivalent needs mid-circuit measurement with feed-forward. Valid by the principle of deferred measurement: the uncomputation never touches the post-selected registers. The success rate is reported rather than hidden. |
 | `case_indicator >= inv_res` | [`arithmetic.py`](src/qpe/arithmetic.py) | Qiskit's `IntegerComparator` compares against a *classical* constant only; HHL needs both operands quantum. |
 
 ## Environment

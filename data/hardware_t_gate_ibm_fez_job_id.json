@@ -1,0 +1,9 @@
+{
+  "job_id": "d9gdo19htsac739gj31g",
+  "backend": "ibm_fez",
+  "submitted": "2026-07-22T17:04:38",
+  "shots": 4096,
+  "true_theta": 0.125,
+  "num_eval_qubits": 3,
+  "transpiled_depth": 139
+}

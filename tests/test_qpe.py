@@ -10,6 +10,8 @@ wrong distributions.
 
 from __future__ import annotations
 
+import json
+
 import numpy as np
 import pytest
 from qiskit import QuantumCircuit
@@ -159,6 +161,96 @@ def test_controlled_powers_are_correct():
         built = Operator(controlled_power(unitary, power))
         expected = Operator(PhaseGate(2 * np.pi * 0.3 * power).control(1))
         assert built.equiv(expected), f"controlled U^{power} is wrong"
+
+
+def test_submit_then_collect_matches_run_circuit(eigenstate_of_phase_gate):
+    """The two-step submit/collect path must agree with the one-shot ``run_circuit``.
+
+    The hardware run in ``03_hardware.ipynb`` submits and collects separately so a queued
+    job survives a dead kernel.  Only a simulator can be exercised here, but the same
+    functions carry the hardware path, so this pins down that splitting the call does not
+    change the result or lose the ISA circuit.
+    """
+    from qpe.backends import counts_from_job, submit_circuit
+
+    n, theta = 3, 1 / 8
+    qc = qpe_circuit(PhaseGate(2 * np.pi * theta), n, eigenstate_of_phase_gate)
+
+    job, isa = submit_circuit(qc, "aer", shots=SHOTS)
+    counts = counts_from_job(job)
+
+    assert best_phase(counts, n).phase == pytest.approx(theta)
+    assert isa.num_qubits >= n + 1
+
+    direct = run_circuit(qc, "aer", shots=SHOTS)
+    assert best_phase(direct, n).phase == pytest.approx(theta)
+
+
+def test_stage_comparison_axis_is_categorical(eigenstate_of_phase_gate):
+    """The comparison chart must show every representable outcome, evenly spaced.
+
+    The point of the categorical axis is that a reader cannot mistake a round number the
+    circuit *cannot* return (0.2, 0.6) for a possible outcome.  So assert there is exactly
+    one tick per outcome and that the labels are the outcomes themselves.
+    """
+    import matplotlib
+
+    matplotlib.use("Agg")
+    from qpe.analysis import plot_stage_comparison
+
+    n, theta = 3, 1 / 8
+    qc = qpe_circuit(PhaseGate(2 * np.pi * theta), n, eigenstate_of_phase_gate)
+    counts = run_circuit(qc, "aer", shots=1024)
+
+    ax = plot_stage_comparison([("ideal", counts, "#4C72B0")], n, true_phase=theta)
+
+    assert len(ax.get_xticks()) == 2**n
+    labels = [t.get_text() for t in ax.get_xticklabels()]
+    assert labels[0].startswith("000") and labels[1].startswith("001")
+    assert "1/8" in labels[1] and "7/8" in labels[-1]
+
+
+def test_submit_and_record_writes_job_id_before_waiting(tmp_path, eigenstate_of_phase_gate):
+    """The job id must be on disk as soon as the job exists, not after it finishes.
+
+    This is what makes a queued hardware run recoverable; if the file were only written
+    after collection, a dropped kernel would lose a job that had already been billed.
+    """
+    from qpe.runs import load_result, submit_and_record
+
+    pending = tmp_path / "job.json"
+    result = tmp_path / "result.json"
+    assert load_result(result) is None
+
+    qc = qpe_circuit(PhaseGate(2 * np.pi / 8), 3, eigenstate_of_phase_gate)
+    job, isa = submit_and_record(qc, "aer", pending, shots=256, metadata={"true_theta": 0.125})
+
+    recorded = json.loads(pending.read_text())
+    assert recorded["job_id"] == job.job_id()
+    assert recorded["shots"] == 256
+    assert recorded["true_theta"] == 0.125
+    assert recorded["transpiled_depth"] == isa.depth()
+
+
+def test_load_device_results_collects_one_experiment_per_device(tmp_path):
+    """Results are keyed by device, and job-id files must not be mistaken for results."""
+    from qpe.runs import load_device_results
+
+    for device, peak in (("ibm_fez", "001"), ("ibm_marrakesh", "010")):
+        (tmp_path / f"hardware_qpe_t_gate_{device}.json").write_text(
+            json.dumps({"backend": device, "counts": {peak: 100}})
+        )
+        (tmp_path / f"hardware_t_gate_{device}_job_id.json").write_text(
+            json.dumps({"job_id": "x", "backend": device})
+        )
+    # A different experiment must not leak into this one's results.
+    (tmp_path / "hardware_qpe_theta_0.2_ibm_fez.json").write_text(
+        json.dumps({"backend": "ibm_fez", "counts": {"010": 100}})
+    )
+
+    results = load_device_results(tmp_path, "t_gate")
+    assert list(results) == ["ibm_fez", "ibm_marrakesh"]
+    assert results["ibm_fez"]["counts"] == {"001": 100}
 
 
 def test_rejects_invalid_arguments(eigenstate_of_phase_gate):

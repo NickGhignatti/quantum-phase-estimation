@@ -28,8 +28,10 @@ an account once::
         set_as_default=True,
     )
 
-or by putting ``IBM_QUANTUM_TOKEN`` and ``IBM_QUANTUM_INSTANCE`` in a ``.env`` file at
-the repository root (git-ignored), which this module reads automatically.
+or by putting ``IBM_QUANTUM_TOKEN`` in a ``.env`` file at the repository root
+(git-ignored), which this module reads automatically.  ``IBM_QUANTUM_INSTANCE`` may be
+set alongside it to pin a specific instance, but can be left blank, in which case the
+account's accessible instances are selected from automatically.
 
 Transpilation
 -------------
@@ -52,6 +54,9 @@ from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 __all__ = [
     "get_backend",
     "run_circuit",
+    "submit_circuit",
+    "counts_from_job",
+    "retrieve_job",
     "counts_to_probabilities",
     "split_counts_by_register",
     "BackendHandle",
@@ -121,7 +126,11 @@ def _runtime_service():
 
     load_dotenv()
     token = os.getenv("IBM_QUANTUM_TOKEN")
-    instance = os.getenv("IBM_QUANTUM_INSTANCE")
+    # A blank line in .env yields "", which is not a valid instance.  Normalise it to
+    # "auto", which asks the service to pick among the instances the account can reach,
+    # the right behaviour for a single-instance free account and quieter than passing
+    # None, which selects the same way but warns about it.
+    instance = os.getenv("IBM_QUANTUM_INSTANCE") or "auto"
 
     if token:
         return QiskitRuntimeService(
@@ -148,6 +157,36 @@ def run_circuit(
         Also return the transpiled circuit.  Useful for reporting depth and gate counts,
         which is the interesting number when explaining a hardware result.
     """
+    job, isa = submit_circuit(
+        circuit,
+        backend,
+        shots,
+        optimization_level=optimization_level,
+        seed_transpiler=seed_transpiler,
+    )
+    counts = counts_from_job(job)
+
+    return (counts, isa) if return_isa else counts
+
+
+def submit_circuit(
+    circuit: QuantumCircuit,
+    backend: BackendHandle | str = "aer",
+    shots: int = 4096,
+    *,
+    optimization_level: int = DEFAULT_OPTIMIZATION_LEVEL,
+    seed_transpiler: int | None = 1234,
+) -> tuple[Any, QuantumCircuit]:
+    """Transpile and submit ``circuit``, returning ``(job, isa_circuit)`` without waiting.
+
+    Split out from :func:`run_circuit` because a hardware job can sit in the queue for
+    hours.  Submitting and collecting separately means the job id can be written to disk
+    the moment it exists, so the result survives the notebook kernel dying mid-queue and
+    can be recovered later with :func:`retrieve_job`.
+
+    On simulator backends the job completes immediately and the distinction is moot; the
+    same two-step path is used so that both are exercised by the same code.
+    """
     handle = get_backend(backend) if isinstance(backend, str) else backend
 
     pm = generate_preset_pass_manager(
@@ -166,10 +205,24 @@ def run_circuit(
 
         sampler = SamplerV2.from_backend(handle.backend)
 
-    result = sampler.run([isa], shots=shots).result()[0]
-    counts = _extract_counts(result)
+    return sampler.run([isa], shots=shots), isa
 
-    return (counts, isa) if return_isa else counts
+
+def counts_from_job(job: Any) -> dict[str, int]:
+    """Block until ``job`` finishes and return its counts.
+
+    Accepts jobs from either sampler, and jobs recovered by :func:`retrieve_job`.
+    """
+    return _extract_counts(job.result()[0])
+
+
+def retrieve_job(job_id: str) -> Any:
+    """Look up a previously submitted hardware job by id.
+
+    The recovery path for a queued run: save the id at submission time, and this returns
+    the job later, in a fresh process, ready for :func:`counts_from_job`.
+    """
+    return _runtime_service().job(job_id)
 
 
 def _extract_counts(pub_result: Any) -> dict[str, int]:

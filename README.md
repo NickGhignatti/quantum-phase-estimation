@@ -34,9 +34,21 @@ saved results from `data/`, so it renders correctly without an account.
   [`src/qpe/core.py`](src/qpe/core.py), validated in
   [`02_qpe_qiskit.ipynb`](notebooks/02_qpe_qiskit.ipynb) against known eigenvalues.
 
-- [ ] **Run on real quantum hardware.**
+- [x] **Run on real quantum hardware.**
   [`03_hardware.ipynb`](notebooks/03_hardware.ipynb): ideal simulator → noise model
-  cloned from a real device → IBM Quantum. *(Awaiting the hardware run.)*
+  cloned from a real device → IBM Quantum. Two experiments, each run on **`ibm_fez`** and
+  **`ibm_marrakesh`** (156-qubit heavy-hex, depth 139 after transpilation, 4096 shots).
+  Raw counts are committed in [`data/`](data/), so the notebook renders without an account.
+
+  θ = 1/8 is exactly representable and both devices recover it, but with P = 0.80 on
+  `ibm_marrakesh` against 0.54 on `ibm_fez`. θ = 0.2 is *not* representable, so success
+  means preserving the ordering of the two straddling outcomes rather than a single peak —
+  and there the devices diverge: `ibm_marrakesh` holds it, `ibm_fez` inverts it and returns
+  the wrong modal estimate. The two also fail by different mechanisms, consistently across
+  both experiments: `ibm_fez` leaks toward the all-zeros string (amplitude damping),
+  `ibm_marrakesh` leaks to the most-significant-bit flip of its peak. Neither is predicted
+  by the static noise model, and running on one device alone would have supported a
+  conclusion that the other contradicts.
 
 - [x] **Connect QPE to HHL.**
   [`src/qpe/hhl.py`](src/qpe/hhl.py) imports and calls `qpe_circuit` directly, ported

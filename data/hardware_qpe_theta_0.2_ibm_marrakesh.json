@@ -1,0 +1,20 @@
+{
+  "job_id": "d9gead9htsac739gjs40",
+  "backend": "ibm_marrakesh",
+  "submitted": "2026-07-22T17:43:51",
+  "shots": 4096,
+  "transpiled_depth": 139,
+  "true_theta": 0.2,
+  "num_eval_qubits": 3,
+  "date": "2026-07-22T17:44:11",
+  "counts": {
+    "001": 1081,
+    "011": 182,
+    "110": 363,
+    "010": 1770,
+    "111": 155,
+    "000": 267,
+    "100": 119,
+    "101": 159
+  }
+}

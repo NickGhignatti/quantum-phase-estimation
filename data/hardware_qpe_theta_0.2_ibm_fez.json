@@ -1,0 +1,20 @@
+{
+  "job_id": "d9gedfcinv1c73asg3a0",
+  "backend": "ibm_fez",
+  "submitted": "2026-07-22T17:50:22",
+  "shots": 4096,
+  "transpiled_depth": 139,
+  "true_theta": 0.2,
+  "num_eval_qubits": 3,
+  "date": "2026-07-22T17:51:54",
+  "counts": {
+    "000": 565,
+    "110": 171,
+    "001": 1740,
+    "010": 1134,
+    "111": 127,
+    "100": 148,
+    "011": 99,
+    "101": 112
+  }
+}

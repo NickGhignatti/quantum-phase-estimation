@@ -1,0 +1,27 @@
+.docname {Quantum Phase Estimation Report}
+.docdescription {Report for the Quantum Computing course in university}
+.doctype {paged}
+.doclang {English}
+.theme {paperwhite} layout:{latex}
+
+.docauthors
+  - Galeri Marco
+  - Ghignatti Nicolò
+
+.pagemargin {bottomcenter}
+    .currentpage
+
+# Quantum Phase Estimation Report
+
+Welcome to [Quarkdown](https://github.com/iamgio/quarkdown)! This is the starting point of your document.
+
+
+- To compile this document, please `cd` to this file's parent directory and run:
+  `quarkdown c main.qd`
+
+- To enable live preview, run:
+  `quarkdown c main.qd -p -w`
+
+For further information and guides, please check out the [official wiki](https://quarkdown.com/wiki).
+
+!(50%)[Quarkdown](image/logo.png)

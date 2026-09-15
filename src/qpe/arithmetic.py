@@ -62,7 +62,7 @@ def comparator_qubit_layout(num_bits: int) -> dict[str, list[int]]:
 
 
 def comparator_ge_gate(num_bits: int, *, label: str | None = None) -> Gate:
-    """Return a gate flipping a result qubit iff ``a >= b``, for quantum ``a`` and ``b``.
+    """Return a gate flipping a result qubit if ``a >= b``, for quantum ``a`` and ``b``.
 
     The gate acts on ``2 * num_bits + 1 + COMPARATOR_ANCILLA_QUBITS(num_bits)`` qubits,
     ordered ``[a (num_bits), b (num_bits), result (1), ancilla (num_bits + 2)]``.
